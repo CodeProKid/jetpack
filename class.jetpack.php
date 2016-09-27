@@ -2817,9 +2817,19 @@ p {
 	 * Get additional stat data to sync to WPCOM
 	 */
 	public static function get_additional_stat_data( $prefix = '' ) {
+		global $wpdb;
+
+		$number_of_users = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->users" );
+		if ( $number_of_users < 10000 && ! is_multisite() ) {
+			$users_count = count_users();
+		} else {
+			$users_count['is_multisite'] = is_multisite();
+			$users_count['number_of_users'] = $number_of_users;
+		}
+
 		$return["{$prefix}themes"]         = Jetpack::get_parsed_theme_data();
 		$return["{$prefix}plugins-extra"]  = Jetpack::get_parsed_plugin_data();
-		$return["{$prefix}users"]          = count_users();
+		$return["{$prefix}users"]          = $users_count;
 		$return["{$prefix}site-count"]     = 0;
 		if ( function_exists( 'get_blog_count' ) ) {
 			$return["{$prefix}site-count"] = get_blog_count();
